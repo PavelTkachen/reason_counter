@@ -1,1 +1,1 @@
-ReactDOMRe.renderToElementWithId(<Counter />, "root")
+ReactDOMRe.renderToElementWithId(<Todo />, "root")
