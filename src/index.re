@@ -1,1 +1,1 @@
-ReactDOMRe.renderToElementWithId(<Nonsense />, "nonsense")
+ReactDOMRe.renderToElementWithId(<Counter />, "root")

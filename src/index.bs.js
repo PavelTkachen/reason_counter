@@ -3,8 +3,8 @@
 
 var React = require("react");
 var ReactDOMRe = require("reason-react/src/legacy/ReactDOMRe.bs.js");
-var Nonsense$Nonsense = require("./Nonsense.bs.js");
+var Counter$Nonsense = require("./Counter.bs.js");
 
-ReactDOMRe.renderToElementWithId(React.createElement(Nonsense$Nonsense.make, {}), "nonsense");
+ReactDOMRe.renderToElementWithId(React.createElement(Counter$Nonsense.make, {}), "root");
 
 /*  Not a pure module */
