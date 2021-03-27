@@ -7,13 +7,14 @@ type state = {
     items: list(item)
 }
 type action = 
-  | AddItem
+  | AddItem(string)
+  | ToggleItem(int)
 let str = React.string;
 
 module TodoItem = {
     [@react.component]
-    let make = (~item) => {
-        <div className="item">
+    let make = (~item, ~onToggle) => {
+        <div className="item" onClick=((_e) => onToggle())>
             <input 
                 type_="checkbox"
                 checked=(item.completed)
@@ -23,13 +24,34 @@ module TodoItem = {
     }
 };
 
+let valueFromEvent = (e): string => e->ReactEvent.Form.target##value;
+module Input = {
+    type state = string;
+    [@react.component]
+    let make = (~onSubmit) => {
+        let (text, setText) = React.useReducer((oldText, newText) => newText, "");
+        <input
+            value=text
+            type_="text"
+            placeholder="Write something to do"
+            onChange=((e) => setText(valueFromEvent(e)))
+            onKeyDown=((e) => 
+                if(ReactEvent.Keyboard.key(e) === "Enter") {
+                    onSubmit(text)
+                    setText("")
+                }
+            )
+        />
+    }
+};
+
 let lastId = ref(0);
-let newItem = () => {
+let newItem = (text) => {
         lastId := lastId^ + 1;
     {   
         id: lastId^,
-        title: "Clicked a btn",
-        completed: true
+        title: text,
+        completed: false
     }
     
 };
@@ -38,7 +60,16 @@ let newItem = () => {
 let make = () => {
     let ({items}, dispatch) = React.useReducer((state, action) => {
         switch action {
-        | AddItem => {items: [newItem(), ...state.items]}
+        | AddItem(text) => {items: [newItem(text), ...state.items]}
+        | ToggleItem(id) => 
+            let items =List.map(
+                (item) =>
+                    item.id === id ?
+                    {...item, completed: !item.completed}:
+                    item,
+                state.items
+            );
+            {items: items}
         };
     }, {
         items: [
@@ -52,14 +83,20 @@ let make = () => {
     <div className="app">
         <div className="title">
             (str("What to do"))
-            <button onClick=((_evt) => dispatch(AddItem))>
-            (str("Add something"))
-            </button>
+            <Input onSubmit=((text) => dispatch(AddItem(text))) />
         </div>
         <div className="items">
             (
                 React.array(Array.of_list(
-                    List.map((item) => <TodoItem key=(string_of_int(item.id)) item />, items)
+                    List.map(
+                        (item) => 
+                        <TodoItem
+                            key=(string_of_int(item.id)) 
+                            item
+                            onToggle=(() => dispatch(ToggleItem(item.id))) 
+                        />, 
+                        items
+                        )
                 ))
             )
             /**
